@@ -9,6 +9,10 @@ description: >
   "hub and spoke", "content architecture", "keyword grouping", or "cluster plan".
 user-invokable: true
 argument-hint: "<seed-keyword or url>"
+license: MIT
+metadata:
+  author: AgriciDaniel
+  source: https://github.com/AgriciDaniel/claude-seo
 ---
 
 # SEO Topic Clustering (Hub-and-Spoke)
@@ -357,6 +361,12 @@ canvas render — no external template or build step needed.
 - Output files should contain no PII, credentials, or API keys.
 - If your implementation fetches pages directly (rather than via search
   snippets), validate/normalize URLs before fetching to guard against SSRF.
+
+## Provenance
+
+This skill originates from the third-party open source Claude Code skill
+`AgriciDaniel/claude-seo` (MIT licensed). Repackaged here with the original
+attribution and license (see `LICENSE.txt`).
 
 ---
 Part of operator-skills, the skills layer from an AI-native company that ran on 70+ agents. raianpollock.com
