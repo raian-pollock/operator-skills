@@ -29,6 +29,4 @@ Copy any skill folder into your agent's skills directory (for Claude Code:
 MIT — see [LICENSE](LICENSE).
 
 ---
-Part of the operating system behind [raianpollock.com](https://raianpollock.com) — I rebuild
-companies to run AI-native, fractional COO style. The agents' tooling lives in the sibling
-repos; this is what teaches them judgment.
+Part of the operating system behind [raianpollock.com](https://raianpollock.com). The agents' tooling lives in the sibling repos; these skills are what teach them judgment.
