@@ -1,27 +1,32 @@
 ---
 name: think-better
 description: >-
-  Structured 5-line opener for non-trivial tasks. Forces goal + decision criterion, approach in 2-3 bullets, one-line premortem, named verifier, and a routing decision (which branch / worktree the work lands on) before any tool calls. Evidence-aligned (Plan-and-Solve, Klein premortem, Anthropic evals-first); explicitly NOT a manufacturing-framework cargo cult. AUTO-TRIGGER on any of the following — do not wait for the user to invoke: a task expected to take 2+ tool calls; a decision under uncertainty (which model, which approach, whether to ship); a research, audit, or investigation task; cross-doc or cross-file edits where blast radius isn't obvious; the user asks "what do you think", "how should we", or "what's the best way". Do NOT fire on single-file mechanical edits (rename, format, typo, one-line fix); bug fixes with clear repro steps from the user; tasks already inside a project's own planning-mode process (that process should own its own Definition of Done and premortem); QA runs (a project's own QA process covers verification). The opener is user-visible — write it as the agent's first text output, before tool calls.
+  Structured opener for non-trivial tasks. Forces goal + decision criterion (and whether the work is finite or evergreen), an INTERVIEW decision (ask the principal the few things only they know before setting a direction, or name why not), approach in 2-3 bullets, one-line premortem, named verifier, and a routing decision (which branch / worktree the work lands on) before any tool calls. Evidence-aligned (Plan-and-Solve, Klein premortem, Anthropic evals-first); explicitly NOT a manufacturing-framework cargo cult. AUTO-TRIGGER on any of the following — do not wait for the user to invoke: a task expected to take 2+ tool calls; a decision under uncertainty (which model, which approach, whether to ship); a research, audit, or investigation task; cross-doc or cross-file edits where blast radius isn't obvious; the user asks "what do you think", "how should we", or "what's the best way". Do NOT fire on single-file mechanical edits (rename, format, typo, one-line fix); bug fixes with clear repro steps from the user; tasks already inside a project's own planning-mode process (that process should own its own Definition of Done and premortem); QA runs (a project's own QA process covers verification). The opener is user-visible — write it as the agent's first text output, before tool calls.
 ---
 
 # think-better
 
-Before tool calls, write six lines (seven for strategic/quantitative tasks):
+Before tool calls, write seven lines (eight for strategic/quantitative tasks):
 
-1. **Goal.** One sentence + decision criterion: "Done when ___." Tag task type when non-obvious: research / build / debug / plan / audit / polish / ship / discussion.
-2. **Approach.** 2–3 bullets, in order. Before writing the bullets, scan whatever scaffolding you actually have available: (a) any installed skills whose description matches the task's *domain*, not just its code path (e.g., analytics reasoning → an analytics/BI skill, model selection → a model-eval skill, multi-locale UI work → an i18n skill, a batch job → a batch-processing skill, deploy staging → a push/release-prep skill). If a skill matches, name it in your first bullet ("using the `<skill>` skill") and load + follow its protocol. If no skill matches, say "no matching skill" so a gap is visible. Then broaden the inventory across the other scaffolding substrates you maintain: (b) any load-bearing project rules that bind this turn (a definition-of-done bar, a quality/north-star principle, an inferential-discipline rule, a reliability-first principle — whatever your project's standing rules are called); (c) any persistent notes/memory index you keep, searched by trigger phrase. Cite the top 1–3 of each substrate in your first or second bullet ("scaffolding bound: <rule>, <rule>, <note>"). Do this *before* the first tool call — waiting until the second or third turn is a known failure mode (scaffolding gets bound retroactively, after the mistake it would have prevented).
-3. **Scope.** One line: "In scope: X, Y. Out of scope: Z. Assumption I have not yet verified: W." Required when blast radius is non-obvious (multi-file, multi-system, multi-locale, cross-functional, plan affects 3+ surfaces). The "Assumption" half forces externalizing the load-bearing premise *before* spending tokens on it; many failures are silent premises that 60 seconds of `grep` would have falsified.
-4. **Premortem.** One line: "If this comes back wrong, most likely reason: ___."
-5. **Verifier.** One line: "I'll know it worked because ___."
-6. **Routes to.** One line: "Work lands on `<branch>` (or `<new worktree off branch X>`); prereq check: <yes/no/N/A>." Skip when the task doesn't write to disk (pure research, planning, conversation).
-7. **Inferential check** (required for any task touching demand/market/ROI/quality claims, candidate ranking, prioritization, A/B reasoning, causal claims, statistical operations, hypothesis framing). One line: "Load-bearing claims tagged at evidence level [X]; biases I'm guarding against: [confirmation / survivorship / sunk-cost-anchoring / self-selection / candidate-independence / base-rate neglect — pick the relevant ones]; one-line falsifier: ___." Skip on mechanical / build / code-quality tasks where no quantitative or strategic claims are made.
+1. **Goal.** One sentence + decision criterion: "Done when ___." Tag task type when non-obvious: research / build / debug / plan / audit / polish / ship / discussion. Also tag the work's SHAPE when the task smells operational: FINITE (ship X, then done) vs EVERGREEN (a pipeline, programme, inbox or campaign that needs ongoing checking, adapting and pivoting). Evergreen work is not done until a standing loop exists: a recurring check with a cadence, the channels it watches, its decision rules, a way to survive session restarts, and a token budget.
+2. **Interview.** One line: "Interviewed: N questions on ___" or "Interview skipped because ___." Any task that sets a DIRECTION (what gets built, who it is for, what it argues, what counts as done) opens by asking the principal the few things only they know, BEFORE drafting or building. Ask in one batch (at most four questions, using your runtime's structured-question tool if it has one, such as `AskUserQuestion` in Claude Code), never dripped one at a time, and put your own best-guess answer first as the recommended option, quoting what is already on file, so the principal corrects rather than composes. Ask about direction and taste; never ask permission to proceed, and never hand back a decision you are there to make — the default to keep executing still governs. Legitimate skips, name which one: an exhaustive spec was already given, mechanical or clear-repro work, a follow-up whose direction an earlier interview already set, or a headless/loop run with nobody at the keyboard. Method and question banks: the `interview` skill ([`../interview/SKILL.md`](../interview/SKILL.md)).
+3. **Approach.** 2–3 bullets, in order. Before writing the bullets, scan whatever scaffolding you actually have available: (a) any installed skills whose description matches the task's *domain*, not just its code path (e.g., analytics reasoning → an analytics/BI skill, routine model routing → `model-pick`'s quick rule (no research), a consequential production model change → a model-eval skill, multi-locale UI work → an i18n skill, a batch job → a batch-processing skill, deploy staging → a push/release-prep skill). If a skill matches, name it in your first bullet ("using the `<skill>` skill") and load + follow its protocol. If no skill matches, say "no matching skill" so a gap is visible. Then broaden the inventory across the other scaffolding substrates you maintain: (b) any load-bearing project rules that bind this turn (a definition-of-done bar, a quality/north-star principle, an inferential-discipline rule, a reliability-first principle — whatever your project's standing rules are called); (c) any persistent notes/memory index you keep, searched by trigger phrase. Cite the top 1–3 of each substrate in your first or second bullet ("scaffolding bound: <rule>, <rule>, <note>"). Do this *before* the first tool call — waiting until the second or third turn is a known failure mode (scaffolding gets bound retroactively, after the mistake it would have prevented).
+4. **Scope.** One line: "In scope: X, Y. Out of scope: Z. Assumption I have not yet verified: W." Required when blast radius is non-obvious (multi-file, multi-system, multi-locale, cross-functional, plan affects 3+ surfaces). The "Assumption" half forces externalizing the load-bearing premise *before* spending tokens on it; many failures are silent premises that 60 seconds of `grep` would have falsified.
+5. **Premortem.** One line: "If this comes back wrong, most likely reason: ___."
+6. **Verifier.** One line: "I'll know it worked because ___."
+7. **Routes to.** One line: "Work lands on `<branch>` (or `<new worktree off branch X>`); prereq check: <yes/no/N/A>." Skip when the task doesn't write to disk (pure research, planning, conversation).
+8. **Inferential check** (required for any task touching demand/market/ROI/quality claims, candidate ranking, prioritization, A/B reasoning, causal claims, statistical operations, hypothesis framing). One line: "Load-bearing claims tagged at evidence level [X]; biases I'm guarding against: [confirmation / survivorship / sunk-cost-anchoring / self-selection / candidate-independence / base-rate neglect — pick the relevant ones]; one-line falsifier: ___." Skip on mechanical / build / code-quality tasks where no quantitative or strategic claims are made.
 
-Then execute. No further ceremony.
+Then execute. No further ceremony, except two mid-task micro-rituals:
+
+- **Before any tool call with real cost, risk or irreversibility** (spawning a sub-agent, a paid model call, a remote mutation, a destructive operation), one line: "This advances the goal because ___."
+- **After each phase or sub-agent return**, a three-line drift check: the original goal / what just landed / converging or diverging.
 
 ## Why these (and only these)
 
 | Element | Evidence | Why kept |
 |---|---|---|
+| Interview | Measured in one production fleet: 34 of 324 substantial sessions (about 10%) ever asked the principal a single question | The cheapest possible fix for the largest measured failure class: work aimed in the wrong direction, corrected only after it was finished |
 | Goal + criterion | Husain/Yan, *What We Learned from a Year of Building with LLMs* (2024): "good writing is good thinking" | Forces externalization; catches misframings before token spend |
 | Plan-then-execute | Plan-and-Solve Prompting (Wang et al., ACL 2023): +5–8% over raw CoT, survives budget-aware evaluation (EMNLP 2024) | Most evidence-backed structural move for LLM agents |
 | Premortem | Klein (2007), *The Power of Premortem* (HBR); reinforced by Kahneman | High-leverage cognitive move that survives translation to LLMs; ~10 tokens |
@@ -38,6 +43,10 @@ Then execute. No further ceremony.
 - **OODA labels.** Vocabulary borrowing; the loop-fast intuition is already how a competent coding agent operates.
 - **Forced "think step by step" preamble.** Wharton GAIL 2025: on reasoning models the gain is negligible and may hurt; already implicit in extended/chain-of-thought reasoning modes.
 - **Self-consistency / multi-agent debate / Tree-of-Thoughts / generic reflexion loops.** High cost; often negative under budget (EMNLP 2024 budget-aware eval; CorrectBench).
+
+## Model routing in tasks and plan mode
+
+Apply the quick rule of thumb in the `model-pick` skill ([`../model-pick/ROUTING.md`](../model-pick/ROUTING.md)) without a separate call or market survey. Entering a planning mode does not trigger a model picker, an eval, a sub-agent or the highest reasoning effort. Adjust reasoning effort on the same capable model first: low for clear work, medium for ordinary planning, high for difficult judgement; maximum needs a specific reason. Use the runtime's supported controls and preserve explicit user settings. For a substantial plan, include one sentence naming the model, a suitable effort and the check that protects quality. Researching the task's *approach* (below) is separate from researching model vendors.
 
 ## Plan-mode addendum: world-class approach research
 
@@ -56,13 +65,13 @@ This is separate from a general "don't reinvent the wheel" check (scanning for e
 
 ## Composition with existing scaffolding
 
-- **Formal planning mode:** if your project already has a planning process that requires a cost estimate, a definition of done, an approach-level premortem, behavioral tests, and now world-class research (above), this opener can be skipped once that planning mode is entered — no double-tax. The world-class-research requirement still applies to the plan body itself.
+- **Formal planning mode:** if your project already has a planning process that requires a cost estimate, a definition of done, an approach-level premortem, behavioral tests, and now world-class research (above), this opener can be skipped once that planning mode is entered (the interview still happens: a plan is direction-setting work by definition) — no double-tax. The world-class-research requirement still applies to the plan body itself.
 - **Project QA/verification steps:** run at task end. This opener runs at task start. They bracket a task without overlapping.
 - **Cost/spend guardrails:** if you already gate metered batch operations on a separate check, don't duplicate it here.
 
 ## Portable form (for runtimes without a skills system)
 
-The six/seven-line opener above is specific to how Claude Code loads skills. The underlying discipline is not — see the accompanying `think-better-portable.md` in this package for a copy-pasteable version for ChatGPT custom instructions, an `AGENTS.md`, or any other system-prompt-driven agent runtime.
+The seven/eight-line opener above is specific to how Claude Code loads skills. The underlying discipline is not — see the accompanying `think-better-portable.md` in this package for a copy-pasteable version for ChatGPT custom instructions, an `AGENTS.md`, or any other system-prompt-driven agent runtime.
 
 ## Sources
 
@@ -72,6 +81,7 @@ The six/seven-line opener above is specific to how Claude Code loads skills. The
 - Wang et al. — [Plan-and-Solve Prompting](https://arxiv.org/abs/2305.04091) (ACL 2023)
 - [Budget-Aware Evaluation of LLM Reasoning Strategies](https://aclanthology.org/2024.emnlp-main.1112.pdf) (EMNLP 2024)
 - [CorrectBench: Can LLMs Correct Themselves?](https://arxiv.org/html/2510.16062v1) (2025)
+- Oncken & Wass — *Management Time: Who's Got the Monkey?* (HBR, 1974), the basis of the interview line
 - Klein — [The Power of Premortem](https://hbr.org/2007/09/performing-a-project-premortem) (HBR, 2007)
 - Husain, Yan et al. — [What We Learned from a Year of Building with LLMs](https://applied-llms.org/) (2024)
 

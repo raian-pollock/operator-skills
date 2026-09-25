@@ -1,25 +1,29 @@
 ---
 name: find-email
 description: >-
-  The canonical procedure for locating a specific person's email address for prospecting (investors, partners, journalists, operators, schools, sales targets). AUTO-TRIGGER whenever the agent needs to find, look up, verify, prospect, or otherwise obtain a particular person's email address — do not wait for the user to invoke it explicitly. Stopping at "I couldn't find an email" after only pattern-guessing is exactly the failure mode this skill exists to prevent. Triggers include: (1) "find email" / "find his email" / "find her email" / "find their email" / "look up email" / "verify email" / "what's X's email" / "email for X" / "X's contact info"; (2) "prospect" / "prospecting" / "cold email" combined with a named person; (3) "investor email" / "VC email" / "partner email" / "founder email"; (4) explicit mention of Anymail Finder, Hunter.io, RocketReach, Lead411, VoilaNorbert, Snov.io, Skrapp; (5) frustration like "couldn't find their email" or "is there a way to find this person's email"; (6) any cold-outreach drafting task that needs a verified recipient address before it can proceed. Escalation order, free before paid, verify before send: (1) a free-tier email finder + verifier (Anymail Finder or similar) run across natural name/domain patterns; (2) search-engine dork sweep with site:/filetype:/intext: operators; (3) specialized free sources — GitHub commit-log mining, the Wayback Machine, personal sites, academic corresponding-author pages, conference speaker bios; (4) a second free-tier finder (Hunter.io); (5) a third free-tier enrichment API (e.g. Surfe) that also returns phone; (6) paid unlock (RocketReach / Lead411 / Apollo), only with the user's explicit go-ahead; (7) LinkedIn/X DM or warm intro as the accepted fallback when a person has intentionally kept their email off the public web. Never stop at brute-force pattern-guessing alone — that is not "trying hard."
+  The canonical procedure for locating a specific person's email address for prospecting (investors, partners, journalists, operators, schools, sales targets). AUTO-TRIGGER whenever the agent needs to find, look up, verify, prospect, or otherwise obtain a particular person's email address — do not wait for the user to invoke it explicitly. Stopping at "I couldn't find an email" after only pattern-guessing is exactly the failure mode this skill exists to prevent. Triggers include: (1) "find email" / "find his email" / "find her email" / "find their email" / "look up email" / "verify email" / "what's X's email" / "email for X" / "X's contact info"; (2) "prospect" / "prospecting" / "cold email" combined with a named person; (3) "investor email" / "VC email" / "partner email" / "founder email"; (4) explicit mention of Anymail Finder, Hunter.io, RocketReach, Lead411, VoilaNorbert, Snov.io, Skrapp; (5) frustration like "couldn't find their email" or "is there a way to find this person's email"; (6) any cold-outreach drafting task that needs a verified recipient address before it can proceed. Escalation order, free before paid, verify before send: (0) the local ledgers first, at no cost: a denylist of addresses that actually bounced (a hit ends the search), a ledger of known-good addresses searched by domain, and any mail the person sent you; (1) a free-tier email finder + verifier (Anymail Finder or similar) run across natural name/domain patterns; (2) search-engine dork sweep with site:/filetype:/intext: operators; (3) specialized free sources — GitHub commit-log mining, the Wayback Machine, personal sites, academic corresponding-author pages, conference speaker bios; (4) a second free-tier finder (Hunter.io); (5) a third free-tier enrichment API (e.g. Surfe) that also returns phone; (6) paid unlock (RocketReach / Lead411 / Apollo), only with the user's explicit go-ahead; (6.5) pivot to another fitting, reachable person at the same organisation; (7) LinkedIn/X DM or warm intro as the accepted fallback when a person has intentionally kept their email off the public web. Never stop at brute-force pattern-guessing alone — that is not "trying hard." And never send a first message to an address whose mailbox has not been verified, however the address was found: a bounce is not an acceptable outcome.
 ---
 
 # find-email: locate a specific person's email for prospecting
 
 ## Hard rules
 
-1. **Never stop at "I couldn't find the email" after only running finder pattern-guesses.** The verify sweep is step 1 of roughly 6-7 tiers. Stopping there is the exact failure mode this skill blocks.
-2. **Never cold-email an unverified address.** Treat finder results by status: `valid` ships, `risky` ships with caution and a caveat, `not_found` / `invalid` / `unknown` does not ship. Verify calls are typically free when the result comes back invalid, so run them liberally.
+1. **Never stop at "I couldn't find the email" after only running finder pattern-guesses.** The verify sweep is one step of roughly eight. Stopping there is the exact failure mode this skill blocks.
+2. **Never cold-email an unverified address.** Treat finder results by status: only an explicit `valid` ships. `risky` never ships in a batch; for a one-to-one message, prefer another channel (phone, a DM), and if the message still goes by email, write the named fallback channel down *before* sending, because `risky` is exactly the band that bounces. `not_found` / `invalid` / `unknown` does not ship. Verify calls are typically free when the result comes back invalid, so run them liberally.
 3. **Never fabricate or guess a "likely email" in a draft.** If an address isn't verified, the draft doesn't get a recipient. Either escalate the search or fall back to a DM. Never paste `firstname@likely-domain.com` into an outbound message.
 4. **Tag every "verified" claim with the tool that verified it.** `[finder: valid]`, `[finder: risky]`, `[hunter: 95% confidence]`, `[github commit log]`, `[personal site contact page]`. "We found X" without provenance is not acceptable.
 5. **Quote the exact canonical email format an organization uses once discovered**, and cache it. `first.last@company.com` vs `flast@company.com` vs `first@company.com` are different patterns — record the pattern per domain so a future lookup at that org skips straight to verification instead of re-running the whole sweep.
 6. **Before declaring a target "no email" / DM-only, you must have run every free tier to exhaustion and be able to say which ones ran.** Two lessons worth internalizing: (a) try the person's *own* domain, not just a parent/network/umbrella domain — a boutique operator's real address often lives on their own small domain, not the larger org they're listed under. (b) enrichment-by-profile-URL (when a provider supports it) reliably outperforms name+company lookups for solo operators or ambiguous companies — a name+company match can silently return the wrong person entirely, while passing the actual LinkedIn/profile URL disambiguates. "No email, DM only" is the genuine last resort, only after the free tiers plus an offered paid unlock have all come up empty.
+7. **Verify the mailbox before any first message, however the address was found.** An address copied from a website, a directory, a conference list, a colleague or an old thread is a claim, not a verified mailbox. Run the verifier on it before the first send. A DNS MX lookup is not a mailbox check: it proves the domain accepts mail, not that this person's mailbox exists. Replies to mail the person sent you are exempt, and so are addresses already attested in your known-good ledger (Step 0). A send-time hook can enforce this mechanically by refusing a first message to any address that is not on the known-good ledger.
 
 ## Decision tree
 
 Run techniques in this order. Stop as soon as you have a verified address. Each tier escalates cost, time, and friction.
 
 ```
+STEP 0 (free, instant)            -- local ledgers: bounced denylist, then known-good ledger, then inbound mail
+   |
+   v (no denylist hit, no ledger hit, no inbound mail from them)
 TIER 1 (free, fast, ~1-2 min)     -- finder API + pattern verification
    |
    v (if 'not_found' on all natural patterns)
@@ -38,12 +42,31 @@ TIER 4.5 (free, limited credits)  -- enrichment API with profile-URL lookup (e.g
 TIER 5 (paid, ~$5-15)             -- paid unlock, ASK THE USER FIRST
    |
    v (if user declines paid, or address still elusive)
+TIER 5.5 (free)                   -- pivot to another fitting, reachable person at the same organisation
+   |
+   v (no fitting alternative)
 TIER 6 (fallback)                 -- LinkedIn/X DM or warm-intro path
 
 REPORT at any tier: verified address + tier where found + source citation.
 ```
 
-## Tier 1: finder API + pattern verification (always start here)
+## Step 0: the local ledgers (free, instant, before anything that costs)
+
+Two local stores answer a useful share of lookups for nothing, and one of them can end the search outright. Neither costs a credit, a quota slot or a network call. Keep both as plain text files next to your outreach tooling, git-ignored.
+
+**1. The bounced denylist. A hit ends the search for that address.**
+Grep it for the domain and for the surname. A row here is a mailbox that actually rejected mail, and that outranks every verifier verdict, including a fresh `valid`. Do not send, do not re-verify hoping for a different answer, and do not escalate to a paid tier: the address is dead, so the search is over and the question becomes which channel to use instead.
+
+Why a separate denylist: an address already documented as a known verifier false positive bounced, and nobody removed it from the known-good list. A later session re-verified it, the vendor said `valid` again, and the dead mailbox wrote itself straight back into the known-good list. A known-good list can only ever say yes, so a bounce needs somewhere to live that a re-verify cannot undo. Grep the denylist first, or you will re-derive the bounce with your own credits.
+
+**2. The known-good ledger. Grep it for the DOMAIN, not only the person.**
+A hit on the person is the answer. A hit on anyone else at the same domain is nearly as good: it shows the organisation's email format for free, which is exactly what Tier 1 would otherwise spend credits to learn. Read the format off the hit and put it at the top of the pattern table below.
+
+**3. If they ever emailed you, that beats every verifier.** Inbound mail proves the mailbox exists in a way no API can, and it costs nothing. Record the address in the known-good ledger with the reason ("they emailed us first") and stop. The recording step should refuse any address on the denylist and fail loudly when it does, so a refusal can never be read as a success.
+
+Only when all three come back empty does Tier 1 start spending.
+
+## Tier 1: finder API + pattern verification (start here once Step 0 is empty)
 
 Wrap a free-tier email-finder API (Anymail Finder is a solid default; similar products work the same way) in a thin script or direct call. Cost discipline on these providers is typically: verifying an address that turns out invalid is free; verifying one that turns out valid, or running a "find" query, burns a small amount of credit.
 
@@ -78,7 +101,7 @@ done
 
 **Multi-domain fanout:** many people have multiple corporate emails (current employer, board seats, personal domain). Try the primary/firm domain first, then plausible alternatives (parent org, prior employer, personal domain).
 
-**STOP CRITERION:** if the finder returns `valid` or `risky` on any pattern, stop, log it, use that address. If everything returns `not_found` after 5-8 attempts across 3-4 plausible domains, proceed to Tier 2.
+**STOP CRITERION:** if the finder returns `valid` on any pattern, stop, log it, use that address. `risky` also stops the search, but it does not automatically ship: it never goes in a batch, and a one-to-one message needs the named fallback channel from Hard rule 2. If everything returns `not_found` after 5-8 attempts across 3-4 plausible domains, proceed to Tier 2.
 
 ## Tier 2: search-engine dork sweep
 
@@ -228,7 +251,7 @@ Origin: a profile-URL enrichment for a hard-to-find target returned no email but
 
 ## Tier 5: paid unlock (ask the user first)
 
-Any paid step over roughly $1-5 per lookup should get explicit user approval before you spend it — don't default into a paid unlock silently.
+Any paid step should stay under the spend threshold the principal sets; above it, get explicit approval every time, per occurrence — don't default into a paid unlock silently. Treat anything within about 10% of the threshold as over it. Confirm the price live from the vendor's own price table before quoting it, never from memory, and price it in the currency the threshold is written in (a dollar figure that looks under a euro threshold can be over it). If the estimate said under and the actual cost crosses the threshold, stop, say so, and do not start the next lookup.
 
 | Service | Approx. cost | When useful |
 |---|---|---|
@@ -239,6 +262,10 @@ Any paid step over roughly $1-5 per lookup should get explicit user approval bef
 
 **Decision rule:** frame the ask concretely — "Provider X has a masked preview for this person; one unlock is about $Y. Want me to go ahead, or stay on the DM path?"
 
+## Tier 5.5: pivot to another fitting person at the same organisation
+
+When the named target is unreachable (every tier exhausted) but the organisation is a genuine fit, do not fall straight to a DM of the unreachable person. First check whether another fitting, reachable person at the same organisation exists: run Tier 1 on its partners or decision-makers (a decision-maker beats a junior or departed contact). If one verifies (`valid`, or `risky` only under the one-to-one rule in Hard rule 2) and passes your dedupe checks, pivot to them. If the campaign already has approval to contact fitting people at that organisation, proceed; otherwise ask. The goal is a real conversation at a fitting organisation, not a particular name. Typical case: a named founder had no reachable company inbox, while a partner at the same firm verified as `valid`.
+
 ## Tier 6: LinkedIn/X DM or warm intro (accepted fallback)
 
 If Tiers 1-5 all fail, the person has likely kept their email off the open web on purpose. Three paths, in rough order of fit:
@@ -247,7 +274,7 @@ If Tiers 1-5 all fail, the person has likely kept their email off the open web o
 2. **X/social DM** — better fit if the person is visibly active there. Check the last-post date first; a dormant account won't reply.
 3. **Warm intro** — ask your own network for an introduction. Alumni networks, professional communities, and shared-connection paths tend to outperform a cold DM.
 
-When falling back to a DM: tell the user explicitly that the email path is exhausted and a DM is the channel, save the message body somewhere paste-ready, and note the "DM only" status against that person/org so a future session doesn't re-run the same search from scratch.
+When falling back to a DM: tell the user explicitly that the email path is exhausted and a DM is the channel, save the message body somewhere paste-ready, and note the "DM only" status against that person/org so a future session doesn't re-run the same search from scratch. If a sent email later bounces, add the address to the bounced denylist (Step 0) the same day.
 
 ## Anti-patterns
 
@@ -257,6 +284,8 @@ When falling back to a DM: tell the user explicitly that the email path is exhau
 4. **Sending to a "best-guess" address without telling the user.** Always surface the verification provenance.
 5. **Caching a pattern too broadly.** If one pattern works for one person at an org, don't assume it holds for everyone there — different hiring eras at the same org sometimes use different conventions (founders often get `first@`, later hires `flast@`).
 6. **Not respecting the privacy wall.** Some people have deliberately hidden their email. Pushing further with paid unlocks after masking + a dormant social presence is a poor signal on both sides — a warm intro will land far better than a found-and-cold email in that case.
+7. **Re-verifying a bounced address.** A fresh `valid` from a verifier does not undo a real bounce. The denylist wins; the search is over for that address.
+8. **Trusting an address because of where it was found.** A website, a directory or an old thread does not verify a mailbox. Verify before the first message (Hard rule 7).
 
 ## Origin case study (anonymized)
 
@@ -268,6 +297,7 @@ When falling back to a DM: tell the user explicitly that the email path is exhau
 
 ## Tooling reference
 
+- Two local ledgers (Step 0) — a bounced denylist and a known-good ledger, plain text, git-ignored, with a small wrapper that can list, grep and record entries. The denylist is checked first and is never overwritten by a `valid` verdict.
 - A free-tier finder API (e.g. Anymail Finder) — find + verify + bulk-verify. Store the API key in a local, git-ignored env file, never inline in a script or committed config.
 - Hunter.io — find + verify + domain-search + account/quota check. Free tier: roughly 50 finds + 50 verifies/month.
 - An enrichment API with profile-URL lookup (e.g. Surfe) — enrich by LinkedIn URL, domain, or company name; returns email and sometimes phone. Free tiers here tend to be smaller and annual rather than monthly. Enrichment calls are often async (submit, then poll for the result).
@@ -277,6 +307,7 @@ When falling back to a DM: tell the user explicitly that the email path is exhau
 
 ## Composition
 
+- Sits inside a wider outbound-campaign discipline: this skill finds ONE person's address; the campaign discipline owns whether the name belongs on the list at all, the pre-send checks that run after an address is verified, and the dedupe that stops two campaigns contacting the same person. Use that discipline when the question is "should we contact them" rather than "what is their address".
 - Pairs with an email-sending skill: once an address is verified, that's where draft creation and send discipline live.
 - Pairs with a hallucination-reduction / evidence-tagging discipline: emails are claims, tag them with their source like any other claim.
 - Pairs with an inferential-discipline habit: don't claim an email is "the one" without stating its verification provenance.
